@@ -9,7 +9,7 @@ Formats include:
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 
@@ -61,7 +61,7 @@ Read in simple arrays:
 </body>
 ```
 The result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFromArraySimple.png = 400x400) 
+![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFromArraySimple.png) 
 
 The array can also contain Objects or Maps:
 
@@ -100,10 +100,6 @@ The array can also contain Objects or Maps:
     </script>
 </body>
 ```
-
-Result:
-
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFromArrayComplex.png =400x400)
 
 ### Objects and Maps
 
@@ -144,9 +140,6 @@ More naturally ocoording data structures like arrays and maps can also be parse:
 </body>
 ```
 
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFromObjectSimple.png = 400x400)
-
 ### Read in data without drawing it
 
 Data can be read in without drawing it:
@@ -169,9 +162,6 @@ These labels can be used to manipulate the data.
 </script>
 ```
 
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFromMemory.png = 400x400)
-
 ### Select labels for x-axis
 
 One or more dimensions can be displayed on the x-axis.
@@ -185,9 +175,6 @@ One or more dimensions can be displayed on the x-axis.
     graph.createGraphFromArray('bar', data, xDimension, ['sum'], [], 'blue', options);
 </script>
 ```
-
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphXDimension.png = 400x400)
 
 ### Select labels for y-axis
 
@@ -203,9 +190,6 @@ One or more dimensions can be displayed on the y-axis.
 </script>
 ```
 
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphYDimension.png = 400x400)
-
 ### Filter data
 
 Simple filters can be applied by passing in a string condition
@@ -220,9 +204,6 @@ Simple filters can be applied by passing in a string condition
 </script>
 ```
 
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFilterSimple.png = 400x400)
-
 Compley filters can be applied by passing in a function that returns a boolean.
 The function can access the data via the variable 'd'.
 
@@ -236,9 +217,6 @@ The function can access the data via the variable 'd'.
 </script>
 ```
 
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFilterComplex.png = 400x400)
-
 ### Aggregate data
 
 The functions **max**, **min**, **sum** and **avg** are available to aggregate data:
@@ -250,9 +228,6 @@ The functions **max**, **min**, **sum** and **avg** are available to aggregate d
     graph.createGraphFromArray('bar', data, 'usernamelast', [{label: 'sum', mode: "max"}], [], 'blue', options);
 </script>
 ```
-
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphAggregateSimple.png = 400x400)
 
 Additionally, custom functions can be passed in to aggregate data:
 
@@ -283,8 +258,32 @@ Additionally, custom functions can be passed in to aggregate data:
 </script>
 ```
 
-Result:
-![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphAggregateSimple.png = 400x400)
+### Different color schemes
+
+Different colors schemes are available as well as an option for a random scheme.
+
+```html
+<script>
+
+    const color = ['yellow', 'orange', 'red', 'green', 'darkgreen', 'turquoise', 'lightblue', 'blue', 'darkblue', 'purple', 'pink', 'rose', 'grey', 'random'];
+
+    graph.createGraphFromArray('bar', data, 'usernamefirst', 'sum', [filter], color[0], options);
+</script>
+```
+
+### Different graph types
+
+The type of graph can be change by changing the type-parameter:
+
+```html
+<script>
+    const type = pie;
+
+    graph.createGraphFromArray(type, data, 'usernamefirst', 'sum', [filter], 'blue', options);
+</script>
+```
+
+All options offered by Graph.js are available.
 
 ## License
 
