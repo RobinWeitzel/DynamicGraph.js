@@ -277,7 +277,7 @@ The type of graph can be change by changing the type-parameter:
 
 ```html
 <script>
-    const type = pie;
+    const type = 'pie';
 
     graph.createGraphFromArray(type, data, 'usernamefirst', 'sum', [filter], 'blue', options);
 </script>
