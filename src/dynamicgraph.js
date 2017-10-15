@@ -629,8 +629,9 @@ class DynamicGraph {
                 dataset = {
                     label: y,
                     data: Array.from(helper.values()).map(h => customReduce(Array.from(h), pos)),
-                    backgroundColor: getColorScheme(color, 0.4, labels.length),
+                    backgroundColor: getColorScheme(color, 0.2, labels.length),
                     borderColor: getColorScheme(color, 1, labels.length),
+                    borderWidth: 1
                 }
             } else {
                 let pos = data[0].indexOf(y.label);
@@ -639,8 +640,9 @@ class DynamicGraph {
                 dataset = {
                     label: y.label,
                     data: Array.from(helper.values()).map(h => customReduce(Array.from(h), pos, y)),
-                    backgroundColor: getColorScheme(color, 0.4, labels.length), 
+                    backgroundColor: getColorScheme(color, 0.2, labels.length), 
                     borderColor: getColorScheme(color, 1, labels.length),
+                    borderWidth: 1
                 }
             }
             datasets.push(dataset);
