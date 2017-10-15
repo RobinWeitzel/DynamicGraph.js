@@ -575,6 +575,7 @@ class DynamicGraph {
 
         // Filter data
         if(filterArray === undefined) filterArray = [];
+        if(typeof filterArray === 'string' || typeof filterArray === 'number') filterArray = [filterArray];
         
         for (let filter of filterArray) {
             let pos = data[0].indexOf(filter.label);
@@ -594,6 +595,7 @@ class DynamicGraph {
 
         // Format data for x-Axis
         if(xArray === undefined) xArray = [];
+        if(typeof xArray === 'string' || typeof xArray === 'number') xArray = [xArray];
 
         for (let x of xArray) {
             let pos = data[0].indexOf(x);
@@ -616,10 +618,11 @@ class DynamicGraph {
 
         // Format data for y-Axis
         if(yArray === undefined) yArray = [];
+        if(typeof yArray === 'string' || typeof yArray === 'number') yArray = [yArray];
 
         for (let y of yArray) {
             let dataset;
-            if (y.mode === undefined) {
+            if (y.function === undefined) {
                 let pos = data[0].indexOf(y);
                 if (pos < 0) continue;
 
@@ -635,7 +638,7 @@ class DynamicGraph {
 
                 dataset = {
                     label: y.label,
-                    data: Array.from(helper.values()).map(h => customReduce(Array.from(h), pos, y.mode)),
+                    data: Array.from(helper.values()).map(h => customReduce(Array.from(h), pos, y)),
                     backgroundColor: getColorScheme(color, 0.4, labels.length), 
                     borderColor: getColorScheme(color, 1, labels.length),
                 }

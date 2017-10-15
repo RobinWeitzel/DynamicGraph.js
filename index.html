@@ -83,28 +83,52 @@
         //alert(JSON.stringify(labels));
         helper.createGraphFromMemory('pie', ['projectid'], ['projectsteps'], []);*/
 
-        // Example data
-        const data = [
-            ['sum', 'user', 'time'],
-            [10, 'Anderson', 1],
-            [2, 'Miller', 2],
-            [5, 'Smith', 3]
-        ];
-        // Graph.js options
-        const options = {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }]
-                },
-                responsive: false
-            };
+       // Example data
+       const map = new Map();
+       map.set('first', "David");
+       map.set('last', "Miller");
 
-        // reading in the array
-        const graph = new DynamicGraph("myChart");
-        graph.createGraphFromArray('bar', data, ['user'], ['sum'], [], 'blue', options);
+   const data = [
+       ['sum', 'user', 'time'],
+       [10, {id: 1, name: map}, 1],
+       [2, {id: 2, name: {first: 'Alex', last: 'Miller'}}, 2],
+       [5, {id: 3, name: {first: 'Julia', last: 'Smith'}}, 3]
+   ];
+
+   // Graph.js options
+   const options = {
+           scales: {
+               yAxes: [{
+                   ticks: {
+                       beginAtZero: true
+                   }
+               }]
+           },
+           responsive: false
+       };
+
+
+const graph = new DynamicGraph("myChart");
+
+const f = (array, pos) => {
+    const mode = {};
+    let maxOccurance = 0;
+    let maxOccuranceValue;
+
+    array.forEach(a => {
+        mode[a[pos]] = mode[a[pos]] ? mode[a[pos]] + 1 : 1;
+
+        if(maxOccurance < mode[a[pos]]) {
+            maxOccurance = mode[a[pos]];
+            maxOccuranceValue = a[pos];
+        }
+    });
+    return maxOccuranceValue;
+};
+
+const yDimension = [{label: 'sum', function: f}];
+
+graph.createGraphFromArray('bar', data, 'usernamelast', yDimension, [], 'blue', options);
         </script>
 </body>
 </html>
