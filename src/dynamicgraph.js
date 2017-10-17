@@ -510,7 +510,9 @@ class DynamicGraph {
      * @param {string} canvasId the ID of the canvas
      */
     constructor(canvasId) {
-        this.ctx = document.getElementById(canvasId);
+        this.canvas = document.getElementById(canvasId);
+        this.canvasHeight = this.canvas.height;
+        this.canvasWidth = this.canvas.width;
         this.chart;
         this.data;
     }
@@ -525,8 +527,9 @@ class DynamicGraph {
      * @param {Object} options The options with which the graph will be drawn (see chart.js for structure)
      */
     drawGraph(type, labels, datasets, options) {
+        this.resetCanvas();
         if(options === undefined) options = {};
-        this.chart = new Chart(this.ctx, {
+        this.chart = new Chart(this.canvas, {
             type: type,
             data: {
                 labels: labels,
@@ -534,6 +537,18 @@ class DynamicGraph {
             },
             options: options
         });
+    }
+
+    /**
+     * Resets the size of the canvas (Graph.js multiplies the size by 2 every time a Graph is drawn)
+     */
+    resetCanvas() {
+        const canvasParent = this.canvas.parentNode;
+        const oldCanvas = this.canvas;
+        const newCanvas = this.canvas = this.canvas.cloneNode(true);
+        newCanvas.height = this.canvasHeight;
+        newCanvas.width = this.canvasWidth;
+        canvasParent.replaceChild(newCanvas, oldCanvas);
     }
 
     /**
@@ -605,8 +620,8 @@ class DynamicGraph {
 
             for (let [key, value] of helper.entries()) {
                 for (let i = 0; i < value.length; i++) {
-                    if (!helper2.has(key + value[i][pos])) helper2.set(key + value[i][pos], []);
-                    helper2.get(key + value[i][pos]).push(value[i]);
+                    if (!helper2.has(key + " " + value[i][pos])) helper2.set(key + " " + value[i][pos], []);
+                    helper2.get(key + " " + value[i][pos]).push(value[i]);
                 }
             }
 
@@ -622,18 +637,7 @@ class DynamicGraph {
 
         for (let y of yArray) {
             let dataset;
-            if (y.function === undefined) {
-                let pos = data[0].indexOf(y);
-                if (pos < 0) continue;
-
-                dataset = {
-                    label: y,
-                    data: Array.from(helper.values()).map(h => customReduce(Array.from(h), pos)),
-                    backgroundColor: getColorScheme(color, 0.2, labels.length),
-                    borderColor: getColorScheme(color, 1, labels.length),
-                    borderWidth: 1
-                }
-            } else {
+            if (y.function !== undefined || y.mode !== undefined) {
                 let pos = data[0].indexOf(y.label);
                 if (pos < 0) continue;
 
@@ -644,6 +648,17 @@ class DynamicGraph {
                     borderColor: getColorScheme(color, 1, labels.length),
                     borderWidth: 1
                 }
+            } else {
+                let pos = data[0].indexOf(y);
+                if (pos < 0) continue;
+
+                dataset = {
+                    label: y,
+                    data: Array.from(helper.values()).map(h => customReduce(Array.from(h), pos)),
+                    backgroundColor: getColorScheme(color, 0.2, labels.length),
+                    borderColor: getColorScheme(color, 1, labels.length),
+                    borderWidth: 1
+                } 
             }
             datasets.push(dataset);
         }
