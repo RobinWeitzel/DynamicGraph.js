@@ -7,6 +7,8 @@ Formats include:
 - Complex objects
 - Complex maps
 
+An interactive example can be found [here](https://robinweitzel.github.io/DynamicGraph.js/).
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
@@ -24,6 +26,21 @@ Include file in your HTML document.
 ```
 
 ## How to use
+
+Read in arrays or objects and define, what should be displayed on the x-axis and y-axis:
+
+```html
+<body>
+    <canvas id="myChart" width="400" height="400"></canvas>
+    <script src="dynamicgraph.js" type="text/javascript"></script>
+    <script>
+        const graph = new DynamicGraph("myChart");
+        graph.createGraphFromArray(graph type, data, x-axis, y-axis, filter, color, options);
+    </script>
+</body>
+```
+
+## Documentation
 
 ### Excel-like data structures
 
@@ -61,6 +78,8 @@ Read in simple arrays:
 </body>
 ```
 The result:
+
+
 ![](https://raw.githubusercontent.com/RobinWeitzel/DynamicGraph.js/master/pictures/graphFromArraySimple.png) 
 
 The array can also contain Objects or Maps:
