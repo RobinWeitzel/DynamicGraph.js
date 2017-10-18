@@ -272,6 +272,7 @@ const getColorScheme = (color, a, length) => {
  * @return {boolean} true, if the array contains an object, otherwise false
  */
 const containsObjects = (array) => {
+    if (Object.prototype.toString.call(array[1]) === "[object Object]" || Object.prototype.toString.call(array[1]) === "[object Map]") return true;
     for (let a of array[1]) {
         if (typeof a === "object") return true;
     }
@@ -287,7 +288,21 @@ const containsObjects = (array) => {
  */
 const sum = (array, pos) => {
     let sum = 0;
-    array.forEach(a => sum += a[pos]);
+    if(typeof array[0][pos] === "number") { 
+        array.forEach(a => sum += a[pos]);
+    } else {
+        // Convert currencies
+        let result = array.map(a => a[pos].replace("$", ""));
+        result = result.map(r => r.replace("€", ""));
+        result = result.map(r => r.replace("£", ""));
+
+        if(isNaN(result[0])) {
+            array.forEach(a => sum += 1);
+        } else {
+            result = result.map(r => parseFloat(r));
+            result.forEach(r => sum += r);
+        }
+    }
     return sum;
 }
 
@@ -301,7 +316,21 @@ const sum = (array, pos) => {
  */
 const avg = (array, pos) => {
     let sum = 0;
-    array.forEach(a => sum += a[pos]);
+    if(typeof array[0][pos] === "number") {  
+        array.forEach(a => sum += a[pos]);  
+    } else {
+        // Convert currencies
+        let result = array.map(a => a[pos].replace("$", ""));
+        result = result.map(r => r.replace("€", ""));
+        result = result.map(r => r.replace("£", ""));
+
+        if(isNaN(result[0])) {
+            array.forEach(a => sum += 1);
+        } else {
+            result = result.map(r => parseFloat(r));
+            result.forEach(r => sum += r);
+        }    
+    }
     return sum / Math.max(array.length, 1);
 };
 
@@ -315,9 +344,32 @@ const avg = (array, pos) => {
  */
 const max = (array, pos) => {
     let max;
-    array.forEach(a => {
-        if (!max || a[pos] > max) max = a[pos];
-    });
+    if(typeof array[0][pos] === "number") {      
+        array.forEach(a => {
+            if (!max || a[pos] > max) max = a[pos];
+        });  
+    } else {
+        // Convert currencies
+        let result = array.map(a => a[pos].replace("$", ""));
+        result = result.map(r => r.replace("€", ""));
+        result = result.map(r => r.replace("£", ""));
+
+        if(isNaN(result[0])) {
+            const maxObj = {};
+            array.forEach(a => {
+                maxObj[a[pos]] = maxObj[a[pos]] + 1 || 1;
+            });
+    
+            Object.entries(maxObj).forEach((key, value) => {
+                if (!max || value > max) max = value;
+            });
+        } else {
+            result = result.map(r => parseFloat(r));
+            result.forEach(r => {
+                if (!max || r > max) max = r;
+            });  
+        }    
+    }
     return max;
 };
 
@@ -331,18 +383,50 @@ const max = (array, pos) => {
  */
 const min = (array, pos) => {
     let min;
-    array.forEach(a => {
-        if (!min || a[pos] < min) min = a[pos];
-    });
+    if(typeof array[0][pos] === "number") { 
+        array.forEach(a => {
+            if (!min || a[pos] < min) min = a[pos];
+        });
+    } else {
+        // Convert currencies
+        let result = array.map(a => a[pos].replace("$", ""));
+        result = result.map(r => r.replace("€", ""));
+        result = result.map(r => r.replace("£", ""));
+
+        if(isNaN(result[0])) {
+            const minObj = {};
+            array.forEach(a => {
+                minObj[a[pos]] = minObj[a[pos]] + 1 || 1;
+            });
+    
+            Object.entries(minObj).forEach((key, value) => {
+                if (!min || value < min) min = value;
+            });
+        } else {
+            result = result.map(r => parseFloat(r));
+            result.forEach(r => {
+                if (!min || r < min) min = r;
+            });  
+        }
+    }
     return min;
+};
+
+const distinct = (array, pos) => {
+    let last = array[0][pos];
+    array.forEach(a => {
+        if (a[pos] !== last) return;
+    });
+    return last;
 };
 
 const customReduce = (array, pos, mode) => {
     if (mode && mode.function !== undefined) return mode.function(array, pos);
-    switch (mode) {
+    switch (mode.mode) {
         case "avg": return avg(array, pos);
         case "max": return max(array, pos);
         case "min": return min(array, pos);
+        case "distinct": return distinct(array, pos);
         default: return sum(array, pos);
     }
 };
@@ -388,9 +472,9 @@ const flattenObjects = (obj, label) => {
                 values.push(obj[key]);
             }
         }
-    } else {
+    } else if (Object.prototype.toString.call(obj) === "[object Map]") {
         for (let key of obj.keys()) {
-            if (Object.prototype.toString.call(obj[key]) === "[object Object]" || Object.prototype.toString.call(obj[key]) === "[object Map]") {
+            if (Object.prototype.toString.call(obj.get(key)) === "[object Object]" || Object.prototype.toString.call(obj.get(key)) === "[object Map]") {
                 const result = flattenObjects(obj.get(key), key);
 
                 for (let i = 0; i < result.labels.length; i++) {
@@ -402,6 +486,8 @@ const flattenObjects = (obj, label) => {
                 values.push(obj.get(key));
             }
         }
+    } else {
+        return { labels: [label], values: obj };
     }
     return { labels: labels, values: values };
 };
@@ -690,6 +776,8 @@ class DynamicGraph {
      * @param {Object} options The options with which the graph will be drawn (see chart.js for structure)
      */
     createGraphFromObject(type, data, xArray, yArray, filterArray, color, options) {
+        if (Object.prototype.toString.call(data) === "[object Array]") data = {'' : data};
+        
         let flattendData = flattenObjects(data, '');
         let arrayData = expandArray(flattendData.values);
         arrayData.splice(0, 0, flattendData.labels);
@@ -756,6 +844,9 @@ class DynamicGraph {
      * @return {[*]} an array containing the labels that can be used to manipulate the data    
      */
     loadObject(data) {
+
+        if (Object.prototype.toString.call(data) === "[object Array]") data = {'' : data};
+        
         let flattendData = flattenObjects(data, '');
         let arrayData = expandArray(flattendData.values);
         arrayData.splice(0, 0, flattendData.labels);
