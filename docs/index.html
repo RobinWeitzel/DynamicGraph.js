@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DynamicGraph.js</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-    crossorigin="anonymous">
+        crossorigin="anonymous">
     <link href="libraries/chosen.min.css" rel="stylesheet">
     <style>
         body {
@@ -17,18 +17,62 @@
         #wrapper {
             display: grid;
             grid-gap: 10px;
-            grid-template-columns: 5% 50%; 
+            grid-template-areas: "header ." "graph options";
+            grid-template-columns: 60% 30%;
         }
 
-        #wrapper > span {
-            grid-column: 1 / 2;
-            margin-left: 10px;
-            line-height: 30px;
-            font-weight: bold;
+        #header {
+            grid-area: header;
+            display: grid;
+            grid-template-rows: 20% 20% 20% 20% 20%;
         }
 
-        .chosen-select {
-            grid-column: 2 / 2;
+        #header>h2 {
+            grid-row: 1;
+        }
+
+        #header>h4 {
+            grid-row: 2;
+        }
+
+        .myRow1 {
+            grid-row: 3;
+            display: grid;
+            grid-template-columns: 10% 90%;
+        }
+
+        .myRow2 {
+            grid-row: 4;
+            display: grid;
+            grid-template-columns: 10% 90%;
+        }
+
+        .myRow3 {
+            grid-row: 5;
+            display: grid;
+            grid-template-columns: 10% 90%;
+        }
+
+        .myRow1>span,
+        .myRow2>span,
+        .myRow3>span {
+            grid-column: 1;
+            justify-self: center;
+            align-self: center;
+        }
+
+        .myRow1>*:not(span),
+        .myRow2>*:not(span),
+        .myRow3>*:not(span) {
+            grid-column: 2;
+        }
+
+        #graph {
+            grid-area: graph;
+        }
+
+        #options {
+            grid-area: options;
         }
 
         .optionPanel {
@@ -95,6 +139,19 @@
             color: gray;
         }
 
+        #yAxis_chosen .distinct::before {
+            content: "distinct(";
+            color: gray;
+        }
+
+        #yAxis_chosen .distinct::after {
+            content: ")";
+            color: gray;
+        }
+        
+
+        
+
         #filter_chosen span[data-filter]::after {
             content: " " attr(data-filter);
             color: gray;
@@ -103,16 +160,141 @@
 </head>
 
 <body>
-    <h2>This is an interactive example of DynamicGraph.js.</h2>
-    <h4>More information can be found on <a href="https://github.com/RobinWeitzel/DynamicGraph.js">Github</a>.</h4>
-<div id="wrapper">
-    <span>x-Axis: </span><select class="chosen-select" multiple id="xAxis"></select>
-    <span>y-Axis: </span><select class="chosen-select" multiple id="yAxis"></select>
-    <span>Filter: </span><select class="chosen-select" multiple id="filter"></select>
-</div>
-<div>
-    <canvas id="myChart" width="800" height="400"></canvas>
-</div>
+    <div id="wrapper">
+        <div id="header">
+            <h2>This is an interactive example of DynamicGraph.js.</h2>
+            <h4>More information can be found on
+                <a href="https://github.com/RobinWeitzel/DynamicGraph.js">Github</a>.
+            </h4>
+            <div class="myRow1">
+                <span>x-Axis: </span>
+                <select class="chosen-select" multiple id="xAxis"></select>
+            </div>
+            <div class="myRow2">
+                <span>y-Axis: </span>
+                <select class="chosen-select" multiple id="yAxis"></select>
+            </div>
+            <div class="myRow3">
+                <span>Filter: </span>
+                <select class="chosen-select" multiple id="filter"></select>
+            </div>
+        </div>
+        <div id="graph">
+            <canvas id="myChart" width="800" height="400"></canvas>
+        </div>
+        <div id="options">
+            <h3>Graph</h3>
+            <div class="form-group">
+                <label>Type:</label>
+                <select class="form-control" id="graphType">
+
+                    <option value="bar">Bar</option>
+
+                    <option value="line">Line</option>
+
+                    <option value="radar">Radar</option>
+
+                    <option value="polarArea">Polar</option>
+
+                    <option value="pie">Pie</option>
+
+                    <option value="doughnut">Doughnut</option>
+
+                    <option value="bubble">Bubble</option>
+
+                    <option value="scatter">Scatter</option>
+                </select>
+                <label>Color:</label>
+                <select class="form-control" id="graphColor">
+
+                    <option value="yellow">Yellow</option>
+
+                    <option value="orange">Orange</option>
+
+                    <option value="red">Red</option>
+
+                    <option value="green">Green</option>
+
+                    <option value="darkgreen">Darkgreen</option>
+
+                    <option value="turquoise">Turquoise</option>
+
+                    <option value="lightblue">Lightblue</option>
+
+                    <option value="blue">Blue</option>
+
+                    <option value="darkblue">Darkblue</option>
+
+                    <option value="purple">Purple</option>
+
+                    <option value="pink">Pink</option>
+
+                    <option value="rose">Rose</option>
+
+                    <option value="grey">Grey</option>
+
+                    <option value="random">Random</option>
+                </select>
+            </div>
+            <h3>Options</h3>
+            <div class="form-group">
+                <label>y-axis type:</label>
+                <select class="form-control" id="yAxisType">
+
+                    <option value="linear">Linear</option>
+
+                    <option value="logarithmic">Logarithmic</option>
+
+                    <option value="category">Category</option>
+
+                    <option value="Time">time</option>
+                </select>
+
+                <label>y-axis position:</label>
+                <select class="form-control" id="yAxisPosition">
+
+                    <option value="top">Top</option>
+
+                    <option value="left">Left</option>
+
+                    <option value="bottom">Bottom</option>
+
+                    <option value="right">Right</option>
+                </select>
+            </div>
+            <div class="checkbox">
+              <label>
+                  <input type="checkbox" value="" id="stacked">Stacked</label>
+          </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" value="" id="beginAtZero">Begin y-axis at zero</label>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" value="" id="autoSkip">Skip unnecessary ticks</label>
+            </div>
+            <div class="form-group">
+            
+                <label for="minTick">y-axis start value:</label>
+            
+                <input type="text" class="form-control" id="minTick">
+            </div>
+            <div class="form-group">
+            
+                <label for="maxTick">y-axis end value:</label>
+            
+                <input type="text" class="form-control" id="maxTick">
+            </div>
+            <div class="form-group">
+            
+                <label for="stepTick">y-axis step:</label>
+            
+                <input type="text" class="form-control" id="stepTick">
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
         crossorigin="anonymous"></script>
@@ -122,40 +304,480 @@
     <script src="libraries/chosen.jquery.js" type="text/javascript"></script>
     <script src="libraries/dynamicgraph.js" type="text/javascript"></script>
     <script>
-        
+
         // Example data
         const map = new Map();
         map.set('first', "David");
         map.set('last', "Miller");
-
+/*
         const data = [
             ['sum', 'user', 'time'],
             [10, { id: 1, name: map }, 1],
             [2, { id: 2, name: { first: 'Alex', last: 'Miller' } }, 2],
             [5, { id: 3, name: { first: 'Julia', last: 'Smith' } }, 3]
-        ];
+        ];*/
 
-        // Graph.js options
-        const options = {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            },
-            responsive: false
-        };
+        const data = JSON.parse(`[{
+  "id": 1,
+  "name": {
+    "first": "Holly",
+    "last": "Scurrey"
+  },
+  "email": "hscurrey0@cnbc.com",
+  "gender": "Female",
+  "country": {
+    "code": "VE",
+    "name": "Venezuela"
+  },
+  "race": "Osage",
+  "title": "Mrs",
+  "phone": "662-613-2116",
+  "car": {
+    "make": "Chrysler",
+    "model": {
+      "name": "Town & Country",
+      "year": 1992
+    }
+  },
+  "stock": {
+    "industry": "n/a",
+    "market": {
+      "name": "NASDAQ",
+      "cap": "$33.67M"
+    },
+    "products": {
+      "name": "China TechFaith Wireless Communication Technology Limited",
+      "sector": "n/a",
+      "development": [
+        "$38559.12",
+        "$-37316.13",
+        "$29652.18",
+        "$-28053.35",
+        "$47506.19",
+        "$100734.16",
+        "$104747.67",
+        "$-34994.09",
+        "$39286.80",
+        "$58338.53"
+      ]
+    }
+  }
+}, {
+  "id": 2,
+  "name": {
+    "first": "Kristos",
+    "last": "Podbury"
+  },
+  "email": "kpodbury1@nydailynews.com",
+  "gender": "Male",
+  "country": {
+    "code": "TH",
+    "name": "Thailand"
+  },
+  "race": "Nicaraguan",
+  "title": "Mr",
+  "phone": "557-179-3254",
+  "car": {
+    "make": "Chevrolet",
+    "model": {
+      "name": "Malibu",
+      "year": 1998
+    }
+  },
+  "stock": {
+    "industry": "n/a",
+    "market": {
+      "name": "NYSE",
+      "cap": "n/a"
+    },
+    "products": {
+      "name": "Mechel PAO",
+      "sector": "n/a",
+      "development": [
+        "$-8511.14",
+        "$57023.12",
+        "$155883.95",
+        "$127259.97",
+        "$174446.37",
+        "$15460.32",
+        "$68194.14",
+        "$160528.05",
+        "$52641.42",
+        "$-24798.73"
+      ]
+    }
+  }
+}, {
+  "id": 3,
+  "name": {
+    "first": "Mareah",
+    "last": "Coalburn"
+  },
+  "email": "mcoalburn2@usa.gov",
+  "gender": "Female",
+  "country": {
+    "code": "CN",
+    "name": "China"
+  },
+  "race": "Cherokee",
+  "title": "Mr",
+  "phone": "284-728-4599",
+  "car": {
+    "make": "Chrysler",
+    "model": {
+      "name": "Aspen",
+      "year": 2008
+    }
+  },
+  "stock": {
+    "industry": "Medical/Dental Instruments",
+    "market": {
+      "name": "NASDAQ",
+      "cap": "$741.39M"
+    },
+    "products": {
+      "name": "AtriCure, Inc.",
+      "sector": "Health Care",
+      "development": [
+        "$90445.89",
+        "$117155.60",
+        "$18065.07",
+        "$51726.25",
+        "$-42429.24",
+        "$44872.07",
+        "$-49643.60",
+        "$-8653.78",
+        "$125590.51",
+        "$162343.21"
+      ]
+    }
+  }
+}, {
+  "id": 4,
+  "name": {
+    "first": "Dulcia",
+    "last": "Turbitt"
+  },
+  "email": "dturbitt3@privacy.gov.au",
+  "gender": "Female",
+  "country": {
+    "code": "FR",
+    "name": "France"
+  },
+  "race": "Sioux",
+  "title": "Dr",
+  "phone": "534-478-2349",
+  "car": {
+    "make": "Pontiac",
+    "model": {
+      "name": "Bonneville",
+      "year": 2000
+    }
+  },
+  "stock": {
+    "industry": "Real Estate Investment Trusts",
+    "market": {
+      "name": "NYSE",
+      "cap": "$9.89B"
+    },
+    "products": {
+      "name": "Extra Space Storage Inc",
+      "sector": "Consumer Services",
+      "development": [
+        "$77868.97",
+        "$91322.86",
+        "$107066.93",
+        "$-43936.70",
+        "$6243.80",
+        "$-42893.62",
+        "$57847.66",
+        "$-29879.51",
+        "$43358.85",
+        "$63382.95"
+      ]
+    }
+  }
+}, {
+  "id": 5,
+  "name": {
+    "first": "Alice",
+    "last": "Lutwidge"
+  },
+  "email": "alutwidge4@cyberchimps.com",
+  "gender": "Female",
+  "country": {
+    "code": "CN",
+    "name": "China"
+  },
+  "race": "Eskimo",
+  "title": "Mrs",
+  "phone": "469-669-1186",
+  "car": {
+    "make": "Pontiac",
+    "model": {
+      "name": "1000",
+      "year": 1985
+    }
+  },
+  "stock": {
+    "industry": "Restaurants",
+    "market": {
+      "name": "NYSE",
+      "cap": "$133.85M"
+    },
+    "products": {
+      "name": "Ruby Tuesday, Inc.",
+      "sector": "Consumer Services",
+      "development": [
+        "$-16700.48",
+        "$6496.03",
+        "$108122.82",
+        "$101885.22",
+        "$30616.55",
+        "$15564.84",
+        "$-41813.15",
+        "$-13443.00",
+        "$131400.38",
+        "$174438.91"
+      ]
+    }
+  }
+}, {
+  "id": 6,
+  "name": {
+    "first": "Lawry",
+    "last": "Garth"
+  },
+  "email": "lgarth5@pbs.org",
+  "gender": "Male",
+  "country": {
+    "code": "RU",
+    "name": "Russia"
+  },
+  "race": "Chilean",
+  "title": "Rev",
+  "phone": "366-729-2541",
+  "car": {
+    "make": "Nissan",
+    "model": {
+      "name": "Quest",
+      "year": 1996
+    }
+  },
+  "stock": {
+    "industry": "n/a",
+    "market": {
+      "name": "NASDAQ",
+      "cap": "$699.62M"
+    },
+    "products": {
+      "name": "First Trust Mid Cap Core AlphaDEX Fund",
+      "sector": "n/a",
+      "development": [
+        "$-12308.57",
+        "$143694.21",
+        "$-3356.02",
+        "$170148.54",
+        "$28849.28",
+        "$59396.33",
+        "$84570.07",
+        "$8717.96",
+        "$165434.63",
+        "$28761.34"
+      ]
+    }
+  }
+}, {
+  "id": 7,
+  "name": {
+    "first": "Clemmy",
+    "last": "Symms"
+  },
+  "email": "csymms6@webeden.co.uk",
+  "gender": "Male",
+  "country": {
+    "code": "IE",
+    "name": "Ireland"
+  },
+  "race": "Houma",
+  "title": "Mr",
+  "phone": "744-895-7397",
+  "car": {
+    "make": "Lexus",
+    "model": {
+      "name": "ES",
+      "year": 1989
+    }
+  },
+  "stock": {
+    "industry": "n/a",
+    "market": {
+      "name": "NYSE",
+      "cap": "n/a"
+    },
+    "products": {
+      "name": "Ashford Hospitality Trust Inc",
+      "sector": "n/a",
+      "development": [
+        "$48074.76",
+        "$188570.77",
+        "$165988.04",
+        "$66514.22",
+        "$57187.32",
+        "$168980.75",
+        "$-30302.68",
+        "$14218.67",
+        "$166852.42",
+        "$162351.80"
+      ]
+    }
+  }
+}, {
+  "id": 8,
+  "name": {
+    "first": "Arlin",
+    "last": "Treharne"
+  },
+  "email": "atreharne7@infoseek.co.jp",
+  "gender": "Male",
+  "country": {
+    "code": "ID",
+    "name": "Indonesia"
+  },
+  "race": "Uruguayan",
+  "title": "Honorable",
+  "phone": "409-709-0085",
+  "car": {
+    "make": "Toyota",
+    "model": {
+      "name": "Echo",
+      "year": 2005
+    }
+  },
+  "stock": {
+    "industry": "Railroads",
+    "market": {
+      "name": "NYSE",
+      "cap": "$34.52B"
+    },
+    "products": {
+      "name": "Norfolk Souther Corporation",
+      "sector": "Transportation",
+      "development": [
+        "$183540.57",
+        "$37568.83",
+        "$140493.80",
+        "$50015.20",
+        "$190683.29",
+        "$2929.46",
+        "$140075.93",
+        "$102144.51",
+        "$153913.64",
+        "$-22622.51"
+      ]
+    }
+  }
+}, {
+  "id": 9,
+  "name": {
+    "first": "Adham",
+    "last": "Hamer"
+  },
+  "email": "ahamer8@bizjournals.com",
+  "gender": "Male",
+  "country": {
+    "code": "PH",
+    "name": "Philippines"
+  },
+  "race": "Salvadoran",
+  "title": "Mrs",
+  "phone": "480-882-4119",
+  "car": {
+    "make": "Geo",
+    "model": {
+      "name": "Tracker",
+      "year": 1992
+    }
+  },
+  "stock": {
+    "industry": "Oil & Gas Production",
+    "market": {
+      "name": "NYSE",
+      "cap": "$92.4M"
+    },
+    "products": {
+      "name": "Cross Timbers Royalty Trust",
+      "sector": "Energy",
+      "development": [
+        "$94229.56",
+        "$23725.81",
+        "$-20339.02",
+        "$35360.34",
+        "$29212.51",
+        "$116486.11",
+        "$32854.22",
+        "$124279.40",
+        "$52691.78",
+        "$-33533.37"
+      ]
+    }
+  }
+}, {
+  "id": 10,
+  "name": {
+    "first": "Konstantin",
+    "last": "Probert"
+  },
+  "email": "kprobert9@mit.edu",
+  "gender": "Male",
+  "country": {
+    "code": "PH",
+    "name": "Philippines"
+  },
+  "race": "Iroquois",
+  "title": "Honorable",
+  "phone": "766-948-7595",
+  "car": {
+    "make": "Plymouth",
+    "model": {
+      "name": "Voyager",
+      "year": 1994
+    }
+  },
+  "stock": {
+    "industry": "Property-Casualty Insurers",
+    "market": {
+      "name": "NASDAQ",
+      "cap": "n/a"
+    },
+    "products": {
+      "name": "Global Indemnity Limited",
+      "sector": "Finance",
+      "development": [
+        "$17732.08",
+        "$178847.30",
+        "$35043.72",
+        "$92765.50",
+        "$120121.87",
+        "$146336.19",
+        "$149526.71",
+        "$120224.28",
+        "$9781.50",
+        "$81113.82"
+      ]
+    }
+  }
+}]`);
 
         const graph = new DynamicGraph("myChart");
 
-        let labels = graph.loadArray(data);
+        let labels = graph.loadObject(data);
         labels.forEach(l => $('.customSelect, .chosen-select').append(`<option>${l}</option>`));
 
-        $(".chosen-select").chosen().change(function(evt, params) {
+        $(".chosen-select").chosen().change(function (evt, params) {
             updateGraph();
             $('.chosen-container span').off('click');
-            $('.chosen-container span').on('click', function(e) {
+            $('.chosen-container span').on('click', function (e) {
                 e.stopPropagation();
             });
         });
@@ -170,19 +792,19 @@
             $('.optionPanel').remove();
             $('.selected').removeClass('selected');
 
-            if($(evt.target).parents('#xAxis_chosen').length > 0) return;
+            if ($(evt.target).parents('#xAxis_chosen').length > 0) return;
 
-            const position = $(evt.target).offset(); 
+            const position = $(evt.target).offset();
             const top = position.top + $(evt.target).height();
             const left = position.left + $(evt.target).outerWidth() / 5;
 
             const arrow = $(`<div class="arrow"></div>`).appendTo('body');
-            arrow.css({top: top, left: left});
+            arrow.css({ top: top, left: left });
 
             $(evt.target).addClass('selected');
 
             let html;
-            if($(evt.target).parents('#yAxis_chosen').length > 0) {
+            if ($(evt.target).parents('#yAxis_chosen').length > 0) {
                 html = `<div class="optionPanel">
                         <label>Aggregation:</label>
                         <div class="list-group">
@@ -190,27 +812,28 @@
                             <a href="#" class="list-group-item ${$(evt.target).hasClass('avg') ? 'active' : ''}">avg</a>
                             <a href="#" class="list-group-item ${$(evt.target).hasClass('max') ? 'active' : ''}">max</a>
                             <a href="#" class="list-group-item ${$(evt.target).hasClass('min') ? 'active' : ''}">min</a>
+                            <a href="#" class="list-group-item ${$(evt.target).hasClass('distinct') ? 'active' : ''}">distinct</a>
                         </div>
-                    </div>`;    
+                    </div>`;
             } else if ($(evt.target).parents('#filter_chosen').length > 0) {
                 html = `<div class="optionPanel">
                         <div class="form-group">
                           <label>Filter:</label>
                           <input type="text" class="form-control filterInput" value='${$(evt.target).attr('data-filter')}'>
                         </div>
-                    </div>`; 
+                    </div>`;
             }
             const div = $(html).appendTo('body');
-            div.css({top: top + 20, left: left - 20});  
-            $('.filterInput').focus();      
+            div.css({ top: top + 20, left: left - 20 });
+            $('.filterInput').focus();
         }
 
-        $(document).on('click', function(e) {
-            if($(e.target).parent('.search-choice').length > 0 || $(e.target).hasClass('optionPanel') || $(e.target).parents('.optionPanel').length > 0 || $(e.target).hasClass('arrow')) {
+        $(document).on('click', function (e) {
+            if ($(e.target).parent('.search-choice').length > 0 || $(e.target).hasClass('optionPanel') || $(e.target).parents('.optionPanel').length > 0 || $(e.target).hasClass('arrow')) {
                 e.stopPropagation();
                 return;
-            }   
-            removePopups();      
+            }
+            removePopups();
         });
 
         function removePopups() {
@@ -220,49 +843,94 @@
             $('.selected').removeClass('selected');
         }
 
-        $(document).on('click', '.list-group-item', function() {
+        $(document).on('click', '.list-group-item', function () {
             $('.list-group-item').removeClass('active');
             $(this).addClass('active');
 
-            $('.selected').removeClass('sum avg max min');
+            $('.selected').removeClass('sum avg max min distinct');
             $('.selected').addClass($(this).text());
             updateGraph();
             removePopups();
-        }); 
+        });
 
-        $(document).on('input', '.filterInput', function() {
+        $(document).on('input', '.filterInput', function () {
             $('.selected').attr('data-filter', $(this).val());
         });
 
-        $(document).on('keypress', '.filterInput', function(e) {
-            if(e.which == 13) {
+        $(document).on('keypress', '.filterInput', function (e) {
+            if (e.which == 13) {
                 updateGraph();
                 removePopups();
             }
         });
 
+        $('#options *').on('change', function () {
+            updateGraph();
+        });
+
+        $('#options *').on('input', function () {
+            updateGraph();
+        });
+
         function updateGraph() {
             const xAxis = [];
-            $('#xAxis_chosen > .chosen-choices span').each(function() {
+            $('#xAxis_chosen > .chosen-choices span').each(function () {
                 xAxis.push($(this).text());
             });
 
             const yAxis = [];
-            $('#yAxis_chosen > .chosen-choices span').each(function() {
+            $('#yAxis_chosen > .chosen-choices span').each(function () {
                 let mode = "sum";
-                if($(this).hasClass('avg')) mode = "avg";
-                if($(this).hasClass('max')) mode = "max";
-                if($(this).hasClass('min')) mode = "min";
+                if ($(this).hasClass('avg')) mode = "avg";
+                if ($(this).hasClass('max')) mode = "max";
+                if ($(this).hasClass('min')) mode = "min";
+                if ($(this).hasClass('distinct')) mode = "distinct";
 
-                yAxis.push({label: $(this).text(), mode: mode});
+                yAxis.push({ label: $(this).text(), mode: mode });
             });
 
             const filter = [];
-            $('#filter_chosen > .chosen-choices span').each(function() {
-                filter.push({label: $(this).text(), condition: $(this).attr('data-filter')});
+            $('#filter_chosen > .chosen-choices span').each(function () {
+                filter.push({ label: $(this).text(), condition: $(this).attr('data-filter') });
             });
 
-            graph.createGraphFromMemory('bar', xAxis, yAxis, filter, 'blue', options);
+            // Create Chart.js options
+            let options = {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: $('#beginAtZero').is(':checked'),
+                            autoSkip: $('#autoSkip').is(':checked')
+                        },
+                        type: $('#yAxisType').val(),
+                        position: $('#yAxisPosition').val(),
+                        stacked: $('#stacked').is(':checked')
+                    }],
+                    xAxes: [{
+                        stacked: $('#stacked').is(':checked')
+                    }]
+                },
+                responsive: false
+            };
+
+            switch($('#graphType').val()) {
+                case "pie":
+                case "doughnut": options = {}; break;
+            }
+
+            if($('#minTick').val() && !isNaN($('#minTick').val())) {
+                options.scales.yAxes[0].ticks.min = parseFloat($('#minTick').val());
+            }
+
+            if($('#maxTick').val() && !isNaN($('#maxTick').val())) {
+                options.scales.yAxes[0].ticks.max = parseFloat($('#maxTick').val());
+            }
+
+            if($('#stepTick').val() && !isNaN($('#stepTick').val())) {
+                options.scales.yAxes[0].ticks.stepSize = parseFloat($('#stepTick').val());
+            }
+
+            graph.createGraphFromMemory($('#graphType').val(), xAxis, yAxis, filter, $('#graphColor').val(), options);
         }
 
     </script>

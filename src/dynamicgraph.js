@@ -1,3 +1,5 @@
+let globalMeta;
+
 /**
  * Creates colors by starting at a color and then subtracking one step ar a time from rh RGB-value
  * 
@@ -272,8 +274,8 @@ const getColorScheme = (color, a, length) => {
  * @return {boolean} true, if the array contains an object, otherwise false
  */
 const containsObjects = (array) => {
-    if (Object.prototype.toString.call(array[1]) === "[object Object]" || Object.prototype.toString.call(array[1]) === "[object Map]") return true;
-    for (let a of array[1]) {
+    if (Object.prototype.toString.call(array[1].data) === "[object Object]" || Object.prototype.toString.call(array[1].data) === "[object Map]") return true;
+    for (let a of array[1].data) {
         if (typeof a === "object") return true;
     }
 };
@@ -288,19 +290,35 @@ const containsObjects = (array) => {
  */
 const sum = (array, pos) => {
     let sum = 0;
-    if(typeof array[0][pos] === "number") { 
-        array.forEach(a => sum += a[pos]);
+    const processedIds = [];
+    if(typeof array[0].data[pos] === "number") { 
+        array.forEach(a => {
+            if(processedIds.indexOf(a.meta[pos]) < 0) {
+                sum += a.data[pos];
+                processedIds.push(a.meta[pos]);
+            }
+        });
     } else {
         // Convert currencies
-        let result = array.map(a => a[pos].replace("$", ""));
+        let result = array.map(a => a.data[pos].replace("$", ""));
         result = result.map(r => r.replace("€", ""));
         result = result.map(r => r.replace("£", ""));
 
         if(isNaN(result[0])) {
-            array.forEach(a => sum += 1);
+            array.forEach(a => {
+                if(processedIds.indexOf(a.meta[pos]) < 0) {
+                    sum += 1;
+                    processedIds.push(a.meta[pos]);
+                }
+            });
         } else {
             result = result.map(r => parseFloat(r));
-            result.forEach(r => sum += r);
+            for(let i = 0; i < result.length; i++) {
+                if(processedIds.indexOf(array[i].meta[pos]) < 0) {
+                    sum += result[i];
+                    processedIds.push(array[i].meta[pos]);
+                }
+            }
         }
     }
     return sum;
@@ -316,20 +334,36 @@ const sum = (array, pos) => {
  */
 const avg = (array, pos) => {
     let sum = 0;
-    if(typeof array[0][pos] === "number") {  
-        array.forEach(a => sum += a[pos]);  
+    const processedIds = [];
+    if(typeof array[0].data[pos] === "number") { 
+        array.forEach(a => {
+            if(processedIds.indexOf(a.meta[pos]) < 0) {
+                sum += a.data[pos];
+                processedIds.push(a.meta[pos]);
+            }
+        });
     } else {
         // Convert currencies
-        let result = array.map(a => a[pos].replace("$", ""));
+        let result = array.map(a => a.data[pos].replace("$", ""));
         result = result.map(r => r.replace("€", ""));
         result = result.map(r => r.replace("£", ""));
 
         if(isNaN(result[0])) {
-            array.forEach(a => sum += 1);
+            array.forEach(a => {
+                if(processedIds.indexOf(a.meta[pos]) < 0) {
+                    sum += 1;
+                    processedIds.push(a.meta[pos]);
+                }
+            });
         } else {
             result = result.map(r => parseFloat(r));
-            result.forEach(r => sum += r);
-        }    
+            for(let i = 0; i < result.length; i++) {
+                if(processedIds.indexOf(array[i].meta[pos]) < 0) {
+                    sum += result[i];
+                    processedIds.push(array[i].meta[pos]);
+                }
+            }
+        }
     }
     return sum / Math.max(array.length, 1);
 };
@@ -344,20 +378,20 @@ const avg = (array, pos) => {
  */
 const max = (array, pos) => {
     let max;
-    if(typeof array[0][pos] === "number") {      
+    if(typeof array[0].data[pos] === "number") {      
         array.forEach(a => {
-            if (!max || a[pos] > max) max = a[pos];
+            if (!max || a.data[pos] > max) max = a.data[pos];
         });  
     } else {
         // Convert currencies
-        let result = array.map(a => a[pos].replace("$", ""));
+        let result = array.map(a => a.data[pos].replace("$", ""));
         result = result.map(r => r.replace("€", ""));
         result = result.map(r => r.replace("£", ""));
 
         if(isNaN(result[0])) {
             const maxObj = {};
             array.forEach(a => {
-                maxObj[a[pos]] = maxObj[a[pos]] + 1 || 1;
+                maxObj[a.data[pos]] = maxObj[a.data[pos]] + 1 || 1;
             });
     
             Object.entries(maxObj).forEach((key, value) => {
@@ -383,20 +417,20 @@ const max = (array, pos) => {
  */
 const min = (array, pos) => {
     let min;
-    if(typeof array[0][pos] === "number") { 
+    if(typeof array[0].data[pos] === "number") { 
         array.forEach(a => {
-            if (!min || a[pos] < min) min = a[pos];
+            if (!min || a.data[pos] < min) min = a.data[pos];
         });
     } else {
         // Convert currencies
-        let result = array.map(a => a[pos].replace("$", ""));
+        let result = array.map(a => a.data[pos].replace("$", ""));
         result = result.map(r => r.replace("€", ""));
         result = result.map(r => r.replace("£", ""));
 
         if(isNaN(result[0])) {
             const minObj = {};
             array.forEach(a => {
-                minObj[a[pos]] = minObj[a[pos]] + 1 || 1;
+                minObj[a.data[pos]] = minObj[a.data[pos]] + 1 || 1;
             });
     
             Object.entries(minObj).forEach((key, value) => {
@@ -412,6 +446,14 @@ const min = (array, pos) => {
     return min;
 };
 
+/**
+ * Returns the aggregated distinct value of all elements of an array at position pos
+ * 
+ * @param {[number]} array The array containing all elements
+ * @param {number} pos The position of the elements that should be summed
+ * 
+ * @return {*} the distinct value if all objects in the array are the same
+ */
 const distinct = (array, pos) => {
     let last = array[0][pos];
     array.forEach(a => {
@@ -420,6 +462,15 @@ const distinct = (array, pos) => {
     return last;
 };
 
+/**
+ * Reduces an array to one value using on eof multiple aggregation methods
+ * 
+ * @param {*} array The array containing all elements
+ * @param {*} pos The position of the elements that should be summed
+ * @param {*} mode The aggreagtion mode
+ * 
+ * @return {*} the aggregated value
+ */
 const customReduce = (array, pos, mode) => {
     if (mode && mode.function !== undefined) return mode.function(array, pos);
     switch (mode.mode) {
@@ -496,21 +547,23 @@ const flattenObjects = (obj, label) => {
  * Similar to flattenObjects, but uses an array with an excel-like structure
  * 
  * @see flattenObjects()
- * @param {[[]*]} array
+ * @param {[[*]]} array
  * @return {[[*]]}
  */
 const flattenArray = (array) => {
     if (array.length < 2) return array;
 
-    for (let i = 0; i < array[1].length; i++) {
-        if (Object.prototype.toString.call(array[1][i]) === "[object Object]" || Object.prototype.toString.call(array[1][i]) === "[object Map]") {
+    for (let i = 0; i < array[1].data.length; i++) {
+        if (Object.prototype.toString.call(array[1].data[i]) === "[object Object]" || Object.prototype.toString.call(array[1].data[i]) === "[object Map]") {
             const label = array[0][i];
-            const result = flattenObjects(array[1][i], label);
+            const result = flattenObjects(array[1].data[i], label);
             array[0].splice(i, 1, ...result.labels);
+            globalMeta.splice(i, 1, ...result.values.map(r => globalMeta[i]));
 
             for (let j = 1; j < array.length; j++) {
-                const result = flattenObjects(array[j][i], label);
-                array[j].splice(i, 1, ...result.values);
+                const result = flattenObjects(array[j].data[i], label);
+                array[j].data.splice(i, 1, ...result.values);
+                array[j].meta.splice(i, 1, ...result.values.map(r => array[j].meta[i]));
             }
         }
     }
@@ -524,8 +577,14 @@ const flattenArray = (array) => {
  * 
  * is coverted into
  * [
- * [1, 'Alex', 'hi],
- * [1, 'Bush', 'hi]
+ *  {
+ *      data: [1, 'Alex', 'hi],
+ *      meta: [1, 1, 1]
+ *  },
+ *  {
+ *      data: [1, 'Bush', 'hi'],
+ *      meta: [1, 2, 1]
+ *  }
  * ]
  * 
  * @param {[[*]]} values The 2-dimensional array
@@ -535,28 +594,40 @@ const flattenArray = (array) => {
 const expandArray = (values) => {
     const result = [];
     const arrayPos = []; // Contains the index of each value that is an array
+    
+    if(values.meta === undefined) {
+        globalMeta = values.map(v => 1); // Contains the meta-data to each array element
+        values = {
+            data: values,
+            meta: globalMeta
+        };
+    }
+    
     let largestArray = 0;
-    for (let i = 0; i < values.length; i++) {
-        if (Object.prototype.toString.call(values[i]) === "[object Array]") {
+
+    for (let i = 0; i < values.data.length; i++) {
+        if (Object.prototype.toString.call(values.data[i]) === "[object Array]") {
             arrayPos.push(i);
-            if (values[i].length >= largestArray) largestArray = values[i].length;
+            if (values.data[i].length >= largestArray) largestArray = values.data[i].length;
         }
     }
 
     if (arrayPos.length < 1) return values;
 
     for (let j = 0; j < largestArray; j++) {
-        const helper = values.slice(0);
+        const helper = values.data.slice(0);
+        const metaHelper = values.meta.slice(0);
         for (let pos of arrayPos) {
-            helper.splice(pos, 1, values[pos][j]);
+            helper.splice(pos, 1, values.data[pos][j]);
+            metaHelper[pos] = globalMeta[pos]++;
         }
-        result.push(helper);
+        result.push({data: helper, meta: metaHelper});
     }
     return result;
 };
 
 /**
- * Expands mutpliw arrays
+ * Expands multiple arrays
  * Example structure:
  * [[projectid, projectsteps]
  * [1, [1, 2, 3]]
@@ -569,7 +640,7 @@ const expandArray = (values) => {
  * [1, 3],
  * [2, 1]]
  * 
- * @param {[[*]]} values Multiple 2-dimensional array
+ * @param {[[*]]} values Multiple 2-dimensional arrays
  * 
  * @return {[[*]]} multiple 1-dimensional arrays
  */
@@ -577,14 +648,13 @@ const expandArrays = (values) => {
     for (let i = 0; i < values.length; i++) {
         const result = expandArray(values[i]);
 
-        if (Object.prototype.toString.call(result[0]) === "[object Array]") {
+        if (Object.prototype.toString.call(result) === "[object Array]") {
             values.splice(i, 1, ...result);
             i += result.length - 1;
         } else {
             values.splice(i, 1, result);
         }
     }
-
     return values;
 };
 
@@ -612,13 +682,14 @@ class DynamicGraph {
      * @param {*} datasets For structure see chart.js
      * @param {Object} options The options with which the graph will be drawn (see chart.js for structure)
      */
-    drawGraph(type, labels, datasets, options) {
+    drawGraph(type, xLabels, yLabels, datasets, options) {
         this.resetCanvas();
         if(options === undefined) options = {};
         this.chart = new Chart(this.canvas, {
             type: type,
             data: {
-                labels: labels,
+                xLabels: xLabels,
+                yLabels: yLabels,
                 datasets: datasets
             },
             options: options
@@ -638,15 +709,10 @@ class DynamicGraph {
     }
 
     /**
-     * Draws a Graph from an Excel-like data structure
+     * Transforms data 
      *      
      * @this {DynamicGraph}
      * @param {string} type The type of chart (see chart.js for awaylable options)
-     * @param {[[string | number]]} data The data in an excel-like data structure: [
-     *      [label1, label2, label3], <- table head
-     *      [data, {label2.1: data, label2.2: data}, data], <- data1
-     *      [data, {label2.1: data, label2.2: data}, data] <- data2
-     *      ]
      * @param {[string]} xArray The names of columns that should be displayed on the x-Axis
      * @param {[string]} yArray The names of columns that should be displayed on the y-Axis
      * @param {[Object]} filterArry The filters that should be applied ot the data in following structure: {label: string, (optional) condition: string, (option) function: string}
@@ -655,22 +721,9 @@ class DynamicGraph {
      * @param {string} color The color-scheme of the graph
      * @param {Object} options The options with which the graph will be drawn (see chart.js for structure)
      */
-    createGraphFromArray(type, data, xArray, yArray, filterArray, color, options) {
+    createGraph(type, xArray, yArray, filterArray, color, options) {
+        const data = this.data;
         if (data.length < 2) return null;
-
-        // Flatten objects in arrays
-        for (let i = 0; i < data[1].length; i++) {
-            if (Object.prototype.toString.call(data[1][i]) === "[object Object]") {
-                const label = data[0][i];
-                const result = flattenObjects(data[1][i], label);
-                data[0].splice(i, 1, ...result.labels);
-
-                for (let j = 1; j < data.length; j++) {
-                    const result = flattenObjects(data[j][i], label);
-                    data[j].splice(i, 1, ...result.values);
-                }
-            }
-        }
 
         let helperData = data.slice(1);
 
@@ -683,11 +736,11 @@ class DynamicGraph {
             if (pos < 0) continue;
 
             if (filter.condition !== undefined) {
-                helperData = helperData.filter(d => eval((typeof d[pos] === 'string' ? `'${d[pos]}'` : d[pos]) + filter.condition));
+                helperData = helperData.filter(d => eval((typeof d.data[pos] === 'string' ? `'${d.data[pos]}'` : d.data[pos]) + filter.condition));
             } else if (filter.function !== undefined) {
                 let f = new Function('d', filter.function);
 
-                helperData = helperData.filter(d => f(d[pos]));
+                helperData = helperData.filter(d => f(d.data[pos]));
             }
         }
 
@@ -706,15 +759,15 @@ class DynamicGraph {
 
             for (let [key, value] of helper.entries()) {
                 for (let i = 0; i < value.length; i++) {
-                    if (!helper2.has(key + " " + value[i][pos])) helper2.set(key + " " + value[i][pos], []);
-                    helper2.get(key + " " + value[i][pos]).push(value[i]);
+                    if (!helper2.has(key + " " + value[i].data[pos])) helper2.set(key + " " + value[i].data[pos], []);
+                    helper2.get(key + " " + value[i].data[pos]).push(value[i]);
                 }
             }
 
             helper = helper2;
         }
 
-        const labels = Array.from(helper.keys());
+        const xLabels = Array.from(helper.keys());
         const datasets = [];
 
         // Format data for y-Axis
@@ -748,7 +801,30 @@ class DynamicGraph {
             }
             datasets.push(dataset);
         }
-        this.drawGraph(type, labels, datasets, options);
+        this.drawGraph(type, xLabels, [], datasets, options);
+    }
+  
+    /**
+     * Draws a Graph from an Excel-like data structure
+     *      
+     * @this {DynamicGraph}
+     * @param {string} type The type of chart (see chart.js for awaylable options)
+     * @param {[[string | number]]} data The data in an excel-like data structure: [
+     *      [label1, label2, label3], <- table head
+     *      [data, {label2.1: data, label2.2: data}, data], <- data1
+     *      [data, {label2.1: data, label2.2: data}, data] <- data2
+     *      ]
+     * @param {[string]} xArray The names of columns that should be displayed on the x-Axis
+     * @param {[string]} yArray The names of columns that should be displayed on the y-Axis
+     * @param {[Object]} filterArry The filters that should be applied ot the data in following structure: {label: string, (optional) condition: string, (option) function: string}
+     *                              condition can be anything that can be evaulated via eval() e.g. > 2
+     *                              function can be a function that returns true or false and uses d as a variable to access the value of each row
+     * @param {string} color The color-scheme of the graph
+     * @param {Object} options The options with which the graph will be drawn (see chart.js for structure)
+     */
+    createGraphFromArray(type, data, xArray, yArray, filterArray, color, options) {
+        this.loadArray(data);
+        this.createGraph(type, xArray, yArray, filterArray, color, options);
     }
 
     /**
@@ -776,19 +852,9 @@ class DynamicGraph {
      * @param {Object} options The options with which the graph will be drawn (see chart.js for structure)
      */
     createGraphFromObject(type, data, xArray, yArray, filterArray, color, options) {
-        if (Object.prototype.toString.call(data) === "[object Array]") data = {'' : data};
-        
-        let flattendData = flattenObjects(data, '');
-        let arrayData = expandArray(flattendData.values);
-        arrayData.splice(0, 0, flattendData.labels);
+        loadObject(data); 
 
-        while (containsObjects(arrayData)) {
-            flattendData = flattenArray(arrayData);
-            arrayData = expandArrays(flattendData.slice(1));
-            arrayData.splice(0, 0, flattendData[0]);
-        }
-
-        this.createGraphFromArray(type, arrayData, xArray, yArray, filterArray, color, options);
+        this.createGraph(type, xArray, yArray, filterArray, color, options);
     }
 
     /**
@@ -820,8 +886,21 @@ class DynamicGraph {
                 }
             }
         }
+        
+        const labels = data[0];
+        
+        let counter = 1;
+        data = data.slice(1).map(da => {
+            const result = {
+                data: da,
+                meta: da.map(d => counter)
+            };
+            counter++;
+            return result;
+        });
+        data.splice(0, 0, labels);
         this.data = data;
-        return data[0];
+        return labels;
     }
 
      /**
@@ -844,7 +923,6 @@ class DynamicGraph {
      * @return {[*]} an array containing the labels that can be used to manipulate the data    
      */
     loadObject(data) {
-
         if (Object.prototype.toString.call(data) === "[object Array]") data = {'' : data};
         
         let flattendData = flattenObjects(data, '');
@@ -856,8 +934,10 @@ class DynamicGraph {
             arrayData = expandArrays(flattendData.slice(1));
             arrayData.splice(0, 0, flattendData[0]);
         }
+        //return this.loadArray(arrayData);
 
-        return this.loadArray(arrayData);
+        this.data = arrayData;
+        return arrayData[0];
     }
 
     /**
@@ -876,7 +956,7 @@ class DynamicGraph {
      */
     createGraphFromMemory(type, xArray, yArray, filterArray, color, options) {
         if(this.data === undefined) return null;
-        this.createGraphFromArray(type, this.data, xArray, yArray, filterArray, color, options)
+        this.createGraph(type, xArray, yArray, filterArray, color, options);
     }
 }
 
